@@ -125,7 +125,7 @@ func isChecked(state State) bool {
 			if to == state.blackKing && from == state.whiteRook {
 				return true
 			}
-	
+
 			if to == state.whiteKing {
 				break
 			}
