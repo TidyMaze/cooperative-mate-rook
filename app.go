@@ -277,7 +277,10 @@ func findWinningMoves(state State) []Move {
 		}
 
 		legalMoves := findLegalMoves(node.state)
-		// debug("Path", node.history, "legalMoves", legalMoves, "checkMated", checkMated)
+
+		if len(node.history) > 0 && (node.history[len(node.history)-1] == Move{piece: whiteRook, from: Coord{5, 5}, to: Coord{5, 7}}) {
+			debug("Path", node.history, "state", node.state, "legalMoves", legalMoves, "checkMated", checkMated)
+		}
 
 		for _, move := range legalMoves {
 			newState := applyMove(node.state, move)
