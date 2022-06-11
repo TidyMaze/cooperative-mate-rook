@@ -281,20 +281,6 @@ func findWinningMoves(state State) []Move {
 
 		legalMoves := findLegalMoves(node.state)
 
-		if len(node.history) > 0 {
-			lastMove := node.history[len(node.history)-1]
-			if lastMove.piece == whiteKing && node.state.whiteKing != lastMove.to {
-				debug("Path", node.history, "state", node.state, "legalMoves", legalMoves, "checkMated", checkMated)
-				panic("wrong white king")
-			} else if lastMove.piece == blackKing && node.state.blackKing != lastMove.to {
-				debug("Path", node.history, "state", node.state, "legalMoves", legalMoves, "checkMated", checkMated)
-				panic("wrong black king")
-			} else if lastMove.piece == whiteRook && node.state.whiteRook != lastMove.to {
-				debug("Path", node.history, "state", node.state, "legalMoves", legalMoves, "checkMated", checkMated)
-				panic("wrong white rook")
-			}
-		}
-
 		for iMove := 0; iMove < len(legalMoves); iMove++ {
 			newState := applyMove(node.state, legalMoves[iMove])
 			if _, ok := visitedState[newState]; !ok {
