@@ -240,10 +240,6 @@ func main() {
 
 	debug("state", state)
 
-	legalMoves := findLegalMoves(state)
-
-	debug("legalMoves", legalMoves)
-
 	winningMoves := findWinningMoves(state)
 
 	// Write a sequence of moves (a single move is, e.g. a2b1) separated by spaces
