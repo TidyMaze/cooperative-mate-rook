@@ -294,11 +294,6 @@ func findWinningMoves(state State) []Move {
 
 		for iMove := 0; iMove < len(legalMoves); iMove++ {
 			newState := applyMove(node.state, legalMoves[iMove])
-
-			if state.movingPlayer == "white" {
-				debug("Applied move", legalMoves[iMove].String(), "to", state.String(), "resulting in", newState.String())
-			}
-
 			queue = append(queue, BreadthFirstSearchNode{newState, append(node.history, legalMoves[iMove])})
 		}
 	}
