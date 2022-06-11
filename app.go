@@ -21,6 +21,29 @@ type State struct {
 	blackKing    Coord
 }
 
+type Move struct {
+	from Coord
+	to   Coord
+}
+
+var kingOffsets = [][]int{
+	{-1, -1},
+	{-1, 0},
+	{-1, 1},
+	{0, -1},
+	{0, 1},
+	{1, -1},
+	{1, 0},
+	{1, 1},
+}
+
+var rookOffsets = [][]int{
+	{-1, 0},
+	{0, -1},
+	{1, 0},
+	{0, 1},
+}
+
 func (c Coord) String() string {
 	return fmt.Sprintf("%c%c", c.x+'a', (8-c.y-1)+'1')
 }
@@ -41,9 +64,96 @@ func parseCoord(s string) Coord {
 	return Coord{x: column, y: 8 - row - 1}
 }
 
-func debug(values ...interface{}) {
+func findCoordsInRangeKing(from Coord) []Coord {
+	res := make([]Coord, 0)
+	for _, offset := range kingOffsets {
+		to := Coord{x: from.x + offset[0], y: from.y + offset[1]}
+		if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
+			continue
+		}
+		res = append(res, to)
+	}
+	return res
+}
+
+func findCoordsInRangeRook(state State, from Coord) []Coord {
+	res := make([]Coord, 0)
+	for _, offset := range rookOffsets {
+		to := from
+
+		for {
+			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
+			if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
+				break
+			}
+
+			if to == state.whiteKing || to == state.blackKing {
+				break
+			}
+
+			res = append(res, to)
+		}
+	}
+	return res
+}
+
+// all coords that are in coordsA but not in coordsB
+func coordsDifference(coordsA []Coord, coordsB []Coord) []Coord {
+	res := make([]Coord, 0)
+	for _, coordA := range coordsA {
+		found := false
+		for _, coordB := range coordsB {
+			if coordA == coordB {
+				found = true
+				break
+			}
+		}
+		if !found {
+			res = append(res, coordA)
+		}
+	}
+	return res
+}
+
+func findLegalMoves(state State) []Move {
+	coordsInRangeBlackKing := findCoordsInRangeKing(state.blackKing)
+	coordsInRangeWhiteKing := findCoordsInRangeKing(state.whiteKing)
+	coordsInRangeWhiteRook := findCoordsInRangeRook(state, state.whiteRook)
+
+	debug("coords", coordsInRangeBlackKing, coordsInRangeWhiteKing, coordsInRangeWhiteRook)
+
+	legalMoves := make([]Move, 0)
+
+	if state.movingPlayer == "white" {
+		// white king moves (range white king, minus range black king)
+		legalWhiteKingCoords := coordsDifference(coordsInRangeWhiteKing, coordsInRangeBlackKing)
+
+		// add white king moves
+		for _, coord := range legalWhiteKingCoords {
+			legalMoves = append(legalMoves, Move{from: state.whiteKing, to: coord})
+		}
+
+		// add white rook moves
+		for _, coord := range coordsInRangeWhiteRook {
+			legalMoves = append(legalMoves, Move{from: state.whiteRook, to: coord})
+		}
+	} else {
+		// black king moves (range black king, minus range white king, minus range white rook)
+		legalBlackKingCoords := coordsDifference(coordsInRangeBlackKing, coordsInRangeWhiteKing)
+		legalBlackKingCoords = coordsDifference(legalBlackKingCoords, coordsInRangeWhiteRook)
+
+		// add black king moves
+		for _, coord := range legalBlackKingCoords {
+			legalMoves = append(legalMoves, Move{from: state.blackKing, to: coord})
+		}
+	}
+
+	return legalMoves
+}
+
+func debug(message string, values ...interface{}) {
 	// print to stderr
-	fmt.Fprintln(os.Stderr, values...)
+	fmt.Fprintf(os.Stderr, message, values...)
 }
 
 func main() {
@@ -60,7 +170,11 @@ func main() {
 
 	state := State{movingPlayer, whiteKingCoord, whiteRookCoord, blackKingCoord}
 
-	debug(state)
+	debug("state", state)
+
+	legalMoves := findLegalMoves(state)
+
+	debug("legalMoves", legalMoves)
 
 	// Write a sequence of moves (a single move is, e.g. a2b1) separated by spaces
 	fmt.Println("h5h1 a1a2 b3b8 h1f1")
