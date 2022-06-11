@@ -62,7 +62,7 @@ func (s State) String() string {
 }
 
 func (m Move) String() string {
-	return fmt.Sprintf("(%s->%s)", m.from, m.to)
+	return fmt.Sprintf("%s%s", m.from, m.to)
 }
 
 // "a8" should be parsed as Coord{x: 0, y: 0}
@@ -271,7 +271,7 @@ func findWinningMoves(state State) []Move {
 		queue = queue[1:]
 
 		checkMated := isCheckmate(node.state)
-		if state.movingPlayer == "black" && checkMated {
+		if checkMated {
 			debug("Checkmate found", node.history)
 			return node.history
 		}
