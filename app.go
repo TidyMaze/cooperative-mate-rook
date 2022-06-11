@@ -106,6 +106,23 @@ func findCoordsInRangeRook(state State, from Coord) []Coord {
 	return res
 }
 
+func isChecked(state State, from Coord) bool {
+	for _, offset := range rookOffsets {
+		to := from
+
+		for {
+			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
+			if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
+				break
+			}
+
+			if to == state.blackKing && from == state.whiteRook {
+				return true
+		}
+	}
+	return false
+}
+
 // all coords that are in coordsA but not in coordsB
 func coordsDifference(coordsA []Coord, coordsB []Coord) []Coord {
 	res := make([]Coord, 0)
@@ -190,6 +207,14 @@ func applyMove(state State, move Move) State {
 func debug(message string, values ...interface{}) {
 	// print to stderr
 	fmt.Fprintf(os.Stderr, "%s%v\n", message, values)
+}
+
+func isChecked(state State, piece Piece) bool {
+	if piece == blackKing {
+		getAttackingCoordsRook(state, state.whiteRook)
+	} else {
+		return false
+	}
 }
 
 func main() {
