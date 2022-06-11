@@ -292,9 +292,9 @@ func findWinningMoves(state State) []Move {
 			}
 		}
 
-		for _, move := range legalMoves {
-			newState := applyMove(node.state, move)
-			queue = append(queue, BreadthFirstSearchNode{newState, append(node.history, move)})
+		for iMove := 0; iMove < len(legalMoves); iMove++ {
+			newState := applyMove(node.state, legalMoves[iMove])
+			queue = append(queue, BreadthFirstSearchNode{newState, append(node.history, legalMoves[iMove])})
 		}
 	}
 
