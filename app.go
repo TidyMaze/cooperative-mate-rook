@@ -299,6 +299,8 @@ func findWinningMoves(state State) []Move {
 			newState := applyMove(node.state, legalMoves[iMove])
 
 			if _, ok := visitedState[newState]; !ok {
+				visitedState[newState] = true
+
 				move := legalMoves[iMove]
 				if move.piece == whiteKing && newState.whiteKing != move.to {
 					panic("CHECK wrong white king")
