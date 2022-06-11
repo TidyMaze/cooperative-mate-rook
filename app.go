@@ -62,7 +62,7 @@ func (s State) String() string {
 }
 
 func (m Move) String() string {
-	return fmt.Sprintf("%s %s", m.from, m.to)
+	return fmt.Sprintf("(%s->%s)", m.from, m.to)
 }
 
 // "a8" should be parsed as Coord{x: 0, y: 0}
@@ -124,6 +124,10 @@ func isChecked(state State) bool {
 
 			if to == state.blackKing && from == state.whiteRook {
 				return true
+			}
+	
+			if to == state.whiteKing {
+				break
 			}
 		}
 	}
