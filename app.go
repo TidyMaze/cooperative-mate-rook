@@ -157,7 +157,7 @@ func findLegalMoves(state State) []Move {
 	coordsInRangeWhiteKing := findCoordsInRangeKing(state.whiteKing)
 	coordsInRangeWhiteRook := findCoordsInRangeRook(state, state.whiteRook)
 
-	debug("coords", fmt.Sprintf("blackKing: %v, whiteKing: %v, whiteRook: %v", coordsInRangeBlackKing, coordsInRangeWhiteKing, coordsInRangeWhiteRook))
+	// debug("coords", fmt.Sprintf("blackKing: %v, whiteKing: %v, whiteRook: %v", coordsInRangeBlackKing, coordsInRangeWhiteKing, coordsInRangeWhiteRook))
 
 	legalMoves := make([]Move, 0)
 
@@ -268,13 +268,15 @@ func findWinningMoves(state State) []Move {
 		node := queue[0]
 		queue = queue[1:]
 
-		debug("Node depth", len(node.history))
-
 		if state.movingPlayer == "black" && isCheckmate(node.state) {
+			debug("Checkmate found", node.history)
 			return node.history
 		}
 
-		for _, move := range findLegalMoves(node.state) {
+		legalMoves := findLegalMoves(node.state)
+		debug("Node depth", len(node.history), "legalMoves", legalMoves)
+
+		for _, move := range legalMoves {
 			newState := applyMove(node.state, move)
 			queue = append(queue, BreadthFirstSearchNode{newState, append(node.history, move)})
 		}
