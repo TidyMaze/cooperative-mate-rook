@@ -21,9 +21,18 @@ type State struct {
 	blackKing    Coord
 }
 
+type Piece int8
+
+const (
+	whiteKing = iota
+	whiteRook
+	blackKing
+)
+
 type Move struct {
-	from Coord
-	to   Coord
+	piece Piece
+	from  Coord
+	to    Coord
 }
 
 var kingOffsets = [][]int{
@@ -130,12 +139,12 @@ func findLegalMoves(state State) []Move {
 
 		// add white king moves
 		for _, coord := range legalWhiteKingCoords {
-			legalMoves = append(legalMoves, Move{from: state.whiteKing, to: coord})
+			legalMoves = append(legalMoves, Move{from: state.whiteKing, to: coord, piece: whiteKing})
 		}
 
 		// add white rook moves
 		for _, coord := range coordsInRangeWhiteRook {
-			legalMoves = append(legalMoves, Move{from: state.whiteRook, to: coord})
+			legalMoves = append(legalMoves, Move{from: state.whiteRook, to: coord, piece: whiteRook})
 		}
 	} else {
 		// black king moves (range black king, minus range white king, minus range white rook)
@@ -144,11 +153,38 @@ func findLegalMoves(state State) []Move {
 
 		// add black king moves
 		for _, coord := range legalBlackKingCoords {
-			legalMoves = append(legalMoves, Move{from: state.blackKing, to: coord})
+			legalMoves = append(legalMoves, Move{from: state.blackKing, to: coord, piece: blackKing})
 		}
 	}
 
 	return legalMoves
+}
+
+func applyMove(state State, move Move) State {
+	if move.piece == whiteKing {
+		return State{
+			movingPlayer: "black",
+			whiteKing:    move.to,
+			whiteRook:    state.whiteRook,
+			blackKing:    state.blackKing,
+		}
+	} else if move.piece == blackKing {
+		return State{
+			movingPlayer: "white",
+			whiteKing:    state.whiteKing,
+			whiteRook:    state.whiteRook,
+			blackKing:    move.to,
+		}
+	} else if move.piece == whiteRook {
+		return State{
+			movingPlayer: "black",
+			whiteKing:    state.whiteKing,
+			whiteRook:    move.to,
+			blackKing:    state.blackKing,
+		}
+	} else {
+		panic("unknown piece")
+	}
 }
 
 func debug(message string, values ...interface{}) {
