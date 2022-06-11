@@ -153,7 +153,7 @@ func findLegalMoves(state State) []Move {
 
 func debug(message string, values ...interface{}) {
 	// print to stderr
-	fmt.Fprintf(os.Stderr, message, values...)
+	fmt.Fprintf(os.Stderr, "%s%v\n", message, values)
 }
 
 func main() {
