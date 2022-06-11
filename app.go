@@ -263,6 +263,9 @@ type BreadthFirstSearchNode struct {
 
 // Breadth-first search until the first checkmate is found
 func findWinningMoves(state State) []Move {
+
+	visitedState := make(map[State]bool)
+
 	queue := make([]BreadthFirstSearchNode, 0)
 	queue = append(queue, BreadthFirstSearchNode{state, []Move{}})
 
@@ -294,21 +297,23 @@ func findWinningMoves(state State) []Move {
 
 		for iMove := 0; iMove < len(legalMoves); iMove++ {
 			newState := applyMove(node.state, legalMoves[iMove])
-			move := legalMoves[iMove]
-			if move.piece == whiteKing && newState.whiteKing != move.to {
-				panic("CHECK wrong white king")
-			} else if move.piece == blackKing && newState.blackKing != move.to {
-				panic("CHECK wrong black king")
-			} else if move.piece == whiteRook && newState.whiteRook != move.to {
-				panic("CHECK wrong white rook")
+
+			if _, ok := visitedState[newState]; !ok {
+				move := legalMoves[iMove]
+				if move.piece == whiteKing && newState.whiteKing != move.to {
+					panic("CHECK wrong white king")
+				} else if move.piece == blackKing && newState.blackKing != move.to {
+					panic("CHECK wrong black king")
+				} else if move.piece == whiteRook && newState.whiteRook != move.to {
+					panic("CHECK wrong white rook")
+				}
+
+				newHistory := make([]Move, len(node.history), len(node.history)+1)
+				copy(newHistory, node.history)
+				newHistory = append(newHistory, move)
+
+				queue = append(queue, BreadthFirstSearchNode{newState, newHistory})
 			}
-
-			newHistory := make([]Move, len(node.history), len(node.history)+1)
-			copy(newHistory, node.history)
-			newHistory = append(newHistory, move)
-			
-
-			queue = append(queue, BreadthFirstSearchNode{newState, newHistory})
 		}
 	}
 
