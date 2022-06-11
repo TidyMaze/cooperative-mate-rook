@@ -61,6 +61,10 @@ func (s State) String() string {
 	return fmt.Sprintf("%s %s %s %s", s.movingPlayer, s.whiteKing, s.whiteRook, s.blackKing)
 }
 
+func (m Move) String() string {
+	return fmt.Sprintf("%s %s", m.from, m.to)
+}
+
 // "a8" should be parsed as Coord{x: 0, y: 0}
 // "a1" should be parsed as Coord{x: 0, y: 7}
 // "h8" should be parsed as Coord{x: 7, y: 0}
@@ -106,7 +110,9 @@ func findCoordsInRangeRook(state State, from Coord) []Coord {
 	return res
 }
 
-func isChecked(state State, from Coord) bool {
+func isChecked(state State) bool {
+	from := state.whiteRook
+
 	for _, offset := range rookOffsets {
 		to := from
 
@@ -118,6 +124,7 @@ func isChecked(state State, from Coord) bool {
 
 			if to == state.blackKing && from == state.whiteRook {
 				return true
+			}
 		}
 	}
 	return false
@@ -209,12 +216,8 @@ func debug(message string, values ...interface{}) {
 	fmt.Fprintf(os.Stderr, "%s%v\n", message, values)
 }
 
-func isChecked(state State, piece Piece) bool {
-	if piece == blackKing {
-		getAttackingCoordsRook(state, state.whiteRook)
-	} else {
-		return false
-	}
+func isCheckmate(state State) bool {
+	return isChecked(state) && len(findLegalMoves(state)) == 0
 }
 
 func main() {
@@ -237,6 +240,43 @@ func main() {
 
 	debug("legalMoves", legalMoves)
 
+	winningMoves := findWinningMoves(state)
+
 	// Write a sequence of moves (a single move is, e.g. a2b1) separated by spaces
-	fmt.Println("h5h1 a1a2 b3b8 h1f1")
+	fmt.Println(formatMovesSequence(winningMoves))
+}
+
+func formatMovesSequence(moves []Move) string {
+	res := ""
+	for _, move := range moves {
+		res += fmt.Sprintf("%s ", move)
+	}
+	return res
+}
+
+type BreadthFirstSearchNode struct {
+	state   State
+	history []Move
+}
+
+// Breadth-first search until the first checkmate is found
+func findWinningMoves(state State) []Move {
+	queue := make([]BreadthFirstSearchNode, 0)
+	queue = append(queue, BreadthFirstSearchNode{state, []Move{}})
+
+	for len(queue) > 0 {
+		node := queue[0]
+		queue = queue[1:]
+
+		if isCheckmate(node.state) {
+			return node.history
+		}
+
+		for _, move := range findLegalMoves(node.state) {
+			newState := applyMove(node.state, move)
+			queue = append(queue, BreadthFirstSearchNode{newState, append(node.history, move)})
+		}
+	}
+
+	return nil
 }
