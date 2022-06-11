@@ -270,13 +270,14 @@ func findWinningMoves(state State) []Move {
 		node := queue[0]
 		queue = queue[1:]
 
-		if state.movingPlayer == "black" && isCheckmate(node.state) {
+		checkMated := isCheckmate(node.state)
+		if state.movingPlayer == "black" && checkMated {
 			debug("Checkmate found", node.history)
 			return node.history
 		}
 
 		legalMoves := findLegalMoves(node.state)
-		debug("Path", node.history, "legalMoves", legalMoves)
+		debug("Path", node.history, "legalMoves", legalMoves, "checkMated", checkMated)
 
 		for _, move := range legalMoves {
 			newState := applyMove(node.state, move)
