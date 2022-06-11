@@ -277,7 +277,7 @@ func findWinningMoves(state State) []Move {
 		}
 
 		legalMoves := findLegalMoves(node.state)
-		debug("Path", node.history, "legalMoves", legalMoves, "checkMated", checkMated)
+		// debug("Path", node.history, "legalMoves", legalMoves, "checkMated", checkMated)
 
 		for _, move := range legalMoves {
 			newState := applyMove(node.state, move)
