@@ -242,6 +242,10 @@ func main() {
 
 	debug("state", state)
 
+	// debugState := State{"white", Coord{7, 7}, Coord{6, 6}, Coord{0, 0}}
+	// debugWinningMoves := findWinningMoves(debugState)
+	// debug("winning moves", formatMovesSequence(debugWinningMoves))
+
 	winningMoves := findWinningMoves(state)
 
 	// Write a sequence of moves (a single move is, e.g. a2b1) separated by spaces
