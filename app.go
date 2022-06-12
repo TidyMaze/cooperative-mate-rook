@@ -237,7 +237,12 @@ func main() {
 func parseNewState() State {
 	var movingPlayer, whiteKing, whiteRook, blackKing string
 	fmt.Scan(&movingPlayer, &whiteKing, &whiteRook, &blackKing)
-	return State{movingPlayer, parseCoord(whiteKing), parseCoord(whiteRook), parseCoord(blackKing)}
+	return State{
+		movingPlayer,
+		parseCoord(whiteKing),
+		parseCoord(whiteRook),
+		parseCoord(blackKing),
+	}
 }
 
 func formatMovesSequence(moves []Move) string {
