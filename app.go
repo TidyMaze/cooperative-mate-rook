@@ -164,18 +164,22 @@ func findLegalMoves(state State) []Move {
 	if state.movingPlayer == "white" {
 		// white king moves (range white king, minus range black king)
 		legalWhiteKingCoords := coordsDifference(coordsInRangeWhiteKing, coordsInRangeBlackKing)
+		legalWhiteKingCoords = coordsDifference(legalWhiteKingCoords, []Coord{state.whiteRook})
 
 		// add white king moves
 		for _, coord := range legalWhiteKingCoords {
 			legalMoves = append(legalMoves, Move{from: state.whiteKing, to: coord, piece: whiteKing})
 		}
 
+		// white rook moves (range white rook, minus taken coords)
+		legalWhiteRookCoords := coordsDifference(coordsInRangeWhiteRook, []Coord{state.whiteKing})
+
 		// add white rook moves
-		for _, coord := range coordsInRangeWhiteRook {
+		for _, coord := range legalWhiteRookCoords {
 			legalMoves = append(legalMoves, Move{from: state.whiteRook, to: coord, piece: whiteRook})
 		}
 	} else {
-		// black king moves (range black king, minus range white king, minus range white rook)
+		// black king moves (range black king, minus range white king, minus range white rook, minus taken coords)
 		legalBlackKingCoords := coordsDifference(coordsInRangeBlackKing, coordsInRangeWhiteKing)
 
 		for _, coord := range legalBlackKingCoords {
