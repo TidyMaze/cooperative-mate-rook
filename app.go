@@ -222,14 +222,10 @@ func findLegalMoves(state State) []Move {
 	legalMoves := make([]Move, 0)
 
 	if state.movingPlayer == "white" {
-		legalWhiteKingMoves := findAllLegalWhiteKingMoves(state)
-		legalMoves = append(legalMoves, legalWhiteKingMoves...)
-
-		legalWhiteRookMoves := findAllLegalWhiteRookMoves(state)
-		legalMoves = append(legalMoves, legalWhiteRookMoves...)
+		legalMoves = append(legalMoves, findAllLegalWhiteKingMoves(state)...)
+		legalMoves = append(legalMoves, findAllLegalWhiteRookMoves(state)...)
 	} else {
-		legalBlackKingMoves := findAllLegalBlackKingMoves(state)
-		legalMoves = append(legalMoves, legalBlackKingMoves...)
+		legalMoves = append(legalMoves, findAllLegalBlackKingMoves(state)...)
 	}
 
 	return legalMoves
