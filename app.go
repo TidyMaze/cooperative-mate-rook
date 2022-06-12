@@ -191,6 +191,30 @@ func findAllLegalBlackKingMoves(state State) []Move {
 	return legalBlackKingMoves
 }
 
+func findAllLegalWhiteKingMoves(state State) []Move {
+	legalWhiteKingCoords := findAllLegalCoordsWhiteKing(state)
+
+	legalWhiteKingMoves := make([]Move, 0)
+
+	for _, coord := range legalWhiteKingCoords {
+		legalWhiteKingMoves = append(legalWhiteKingMoves, Move{from: state.whiteKing, to: coord, piece: whiteKing})
+
+	}
+
+	return legalWhiteKingMoves
+}
+
+func findAllLegalWhiteRookMoves(state State) []Move {
+	legalWhiteRookCoords := findAllLegalCoordsWhiteRook(state)
+
+	legalWhiteRookMoves := make([]Move, 0)
+
+	for _, coord := range legalWhiteRookCoords {
+		legalWhiteRookMoves = append(legalWhiteRookMoves, Move{from: state.whiteRook, to: coord, piece: whiteRook})
+	}
+	return legalWhiteRookMoves
+}
+
 func findLegalMoves(state State) []Move {
 
 	// debug("coords", fmt.Sprintf("blackKing: %v, whiteKing: %v, whiteRook: %v", coordsInRangeBlackKing, coordsInRangeWhiteKing, coordsInRangeWhiteRook))
@@ -198,15 +222,11 @@ func findLegalMoves(state State) []Move {
 	legalMoves := make([]Move, 0)
 
 	if state.movingPlayer == "white" {
-		legalWhiteKingCoords := findAllLegalCoordsWhiteKing(state)
-		for _, coord := range legalWhiteKingCoords {
-			legalMoves = append(legalMoves, Move{from: state.whiteKing, to: coord, piece: whiteKing})
-		}
+		legalWhiteKingMoves := findAllLegalWhiteKingMoves(state)
+		legalMoves = append(legalMoves, legalWhiteKingMoves...)
 
-		legalWhiteRookCoords := findAllLegalCoordsWhiteRook(state)
-		for _, coord := range legalWhiteRookCoords {
-			legalMoves = append(legalMoves, Move{from: state.whiteRook, to: coord, piece: whiteRook})
-		}
+		legalWhiteRookMoves := findAllLegalWhiteRookMoves(state)
+		legalMoves = append(legalMoves, legalWhiteRookMoves...)
 	} else {
 		legalBlackKingMoves := findAllLegalBlackKingMoves(state)
 		legalMoves = append(legalMoves, legalBlackKingMoves...)
