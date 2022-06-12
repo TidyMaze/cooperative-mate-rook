@@ -152,43 +152,64 @@ func coordsDifference(coordsA []Coord, coordsB []Coord) []Coord {
 	return res
 }
 
-func findLegalMoves(state State) []Move {
+func findAllLegalCoordsWhiteKing(state State) []Coord {
+	coordsInRangeWhiteKing := findCoordsInRangeKing(state.whiteKing)
+	coordsInRangeBlackKing := findCoordsInRangeKing(state.blackKing)
+
+	// white king moves (range white king, minus range black king)
+	legalWhiteKingCoords := coordsDifference(coordsInRangeWhiteKing, coordsInRangeBlackKing)
+	legalWhiteKingCoords = coordsDifference(legalWhiteKingCoords, []Coord{state.whiteRook})
+
+	return legalWhiteKingCoords
+}
+
+func findAllLegalCoordsWhiteRook(state State) []Coord {
+	coordsInRangeWhiteRook := findCoordsInRangeRook(state, state.whiteRook)
+	// white rook moves (range white rook, minus taken coords)
+	legalWhiteRookCoords := coordsDifference(coordsInRangeWhiteRook, []Coord{state.whiteKing})
+
+	return legalWhiteRookCoords
+}
+
+func findAllLegalBlackKingMoves(state State) []Move {
 	coordsInRangeBlackKing := findCoordsInRangeKing(state.blackKing)
 	coordsInRangeWhiteKing := findCoordsInRangeKing(state.whiteKing)
-	coordsInRangeWhiteRook := findCoordsInRangeRook(state, state.whiteRook)
+
+	// black king moves (range black king, minus range white king, minus range white rook, minus taken coords)
+	legalBlackKingCoords := coordsDifference(coordsInRangeBlackKing, coordsInRangeWhiteKing)
+
+	legalBlackKingMoves := make([]Move, 0)
+
+	for _, coord := range legalBlackKingCoords {
+		move := Move{from: state.blackKing, to: coord, piece: blackKing}
+		newState := applyMove(state, move)
+		if !isChecked(newState) {
+			legalBlackKingMoves = append(legalBlackKingMoves, move)
+		}
+	}
+
+	return legalBlackKingMoves
+}
+
+func findLegalMoves(state State) []Move {
 
 	// debug("coords", fmt.Sprintf("blackKing: %v, whiteKing: %v, whiteRook: %v", coordsInRangeBlackKing, coordsInRangeWhiteKing, coordsInRangeWhiteRook))
 
 	legalMoves := make([]Move, 0)
 
 	if state.movingPlayer == "white" {
-		// white king moves (range white king, minus range black king)
-		legalWhiteKingCoords := coordsDifference(coordsInRangeWhiteKing, coordsInRangeBlackKing)
-		legalWhiteKingCoords = coordsDifference(legalWhiteKingCoords, []Coord{state.whiteRook})
-
-		// add white king moves
+		legalWhiteKingCoords := findAllLegalCoordsWhiteKing(state)
 		for _, coord := range legalWhiteKingCoords {
 			legalMoves = append(legalMoves, Move{from: state.whiteKing, to: coord, piece: whiteKing})
 		}
 
-		// white rook moves (range white rook, minus taken coords)
-		legalWhiteRookCoords := coordsDifference(coordsInRangeWhiteRook, []Coord{state.whiteKing})
-
-		// add white rook moves
+		legalWhiteRookCoords := findAllLegalCoordsWhiteRook(state)
 		for _, coord := range legalWhiteRookCoords {
 			legalMoves = append(legalMoves, Move{from: state.whiteRook, to: coord, piece: whiteRook})
 		}
 	} else {
-		// black king moves (range black king, minus range white king, minus range white rook, minus taken coords)
-		legalBlackKingCoords := coordsDifference(coordsInRangeBlackKing, coordsInRangeWhiteKing)
-
-		for _, coord := range legalBlackKingCoords {
-			move := Move{from: state.blackKing, to: coord, piece: blackKing}
-			newState := applyMove(state, move)
-			if !isChecked(newState) {
-				legalMoves = append(legalMoves, move)
-			}
-		}
+		legalBlackKingMoves := findAllLegalBlackKingMoves(state)
+		legalMoves = append(legalMoves, legalBlackKingMoves...)
 	}
 
 	return legalMoves
