@@ -81,12 +81,17 @@ func findCoordsInRangeKing(from Coord) []Coord {
 	res := make([]Coord, 0)
 	for _, offset := range kingOffsets {
 		to := Coord{x: from.x + offset[0], y: from.y + offset[1]}
-		if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
+		if !isValidCoord(to) {
 			continue
 		}
 		res = append(res, to)
 	}
 	return res
+}
+
+func isValidCoord(to Coord) bool {
+	outside := to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7
+	return !outside
 }
 
 func findCoordsInRangeRook(state State, from Coord) []Coord {
@@ -95,7 +100,7 @@ func findCoordsInRangeRook(state State, from Coord) []Coord {
 		to := from
 		for {
 			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
-			if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
+			if !isValidCoord(to) {
 				break
 			}
 
