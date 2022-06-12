@@ -237,10 +237,7 @@ func main() {
 func parseNewState() State {
 	var movingPlayer, whiteKing, whiteRook, blackKing string
 	fmt.Scan(&movingPlayer, &whiteKing, &whiteRook, &blackKing)
-	whiteKingCoord := parseCoord(whiteKing)
-	whiteRookCoord := parseCoord(whiteRook)
-	blackKingCoord := parseCoord(blackKing)
-	state := State{movingPlayer, whiteKingCoord, whiteRookCoord, blackKingCoord}
+	state := State{movingPlayer, parseCoord(whiteKing), parseCoord(whiteRook), parseCoord(blackKing)}
 	return state
 }
 
