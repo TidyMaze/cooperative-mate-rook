@@ -231,14 +231,17 @@ func isCheckmate(state State) bool {
 }
 
 func main() {
+	fmt.Println(formatMovesSequence(findWinningMoves(parseNewState())))
+}
+
+func parseNewState() State {
 	var movingPlayer, whiteKing, whiteRook, blackKing string
 	fmt.Scan(&movingPlayer, &whiteKing, &whiteRook, &blackKing)
 	whiteKingCoord := parseCoord(whiteKing)
 	whiteRookCoord := parseCoord(whiteRook)
 	blackKingCoord := parseCoord(blackKing)
 	state := State{movingPlayer, whiteKingCoord, whiteRookCoord, blackKingCoord}
-	winningMoves := findWinningMoves(state)
-	fmt.Println(formatMovesSequence(winningMoves))
+	return state
 }
 
 func formatMovesSequence(moves []Move) string {
