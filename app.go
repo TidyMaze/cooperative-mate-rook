@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 )
 
 /**
@@ -35,6 +34,11 @@ type Move struct {
 	to    Coord
 }
 
+type BreadthFirstSearchNode struct {
+	state   State
+	history []Move
+}
+
 var kingOffsets = [][]int{
 	{-1, -1},
 	{-1, 0},
@@ -65,10 +69,6 @@ func (m Move) String() string {
 	return fmt.Sprintf("%s%s", m.from, m.to)
 }
 
-// "a8" should be parsed as Coord{x: 0, y: 0}
-// "a1" should be parsed as Coord{x: 0, y: 7}
-// "h8" should be parsed as Coord{x: 7, y: 0}
-// "h1" should be parsed as Coord{x: 7, y: 7}
 func parseCoord(s string) Coord {
 	columnStr := string(s[0])
 	rowStr := string(s[1])
@@ -93,7 +93,6 @@ func findCoordsInRangeRook(state State, from Coord) []Coord {
 	res := make([]Coord, 0)
 	for _, offset := range rookOffsets {
 		to := from
-
 		for {
 			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
 			if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
@@ -111,11 +110,8 @@ func findCoordsInRangeRook(state State, from Coord) []Coord {
 }
 
 func isChecked(state State) bool {
-	from := state.whiteRook
-
 	for _, offset := range rookOffsets {
-		to := from
-
+		to := state.whiteRook
 		for {
 			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
 			if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
@@ -155,61 +151,52 @@ func coordsDifference(coordsA []Coord, coordsB []Coord) []Coord {
 func findAllLegalBlackKingMoves(state State) []Move {
 	coordsInRangeBlackKing := findCoordsInRangeKing(state.blackKing)
 	coordsInRangeWhiteKing := findCoordsInRangeKing(state.whiteKing)
-	legalBlackKingCoords := coordsDifference(coordsInRangeBlackKing, coordsInRangeWhiteKing)
-	legalBlackKingMoves := make([]Move, 0)
-
-	for _, coord := range legalBlackKingCoords {
+	coords := coordsDifference(coordsInRangeBlackKing, coordsInRangeWhiteKing)
+	res := make([]Move, 0)
+	for _, coord := range coords {
 		move := Move{from: state.blackKing, to: coord, piece: blackKing}
 		newState := applyMove(state, move)
 		if !isChecked(newState) {
-			legalBlackKingMoves = append(legalBlackKingMoves, move)
+			res = append(res, move)
 		}
 	}
 
-	return legalBlackKingMoves
+	return res
 }
 
 func findAllLegalWhiteKingMoves(state State) []Move {
 	coordsInRangeWhiteKing := findCoordsInRangeKing(state.whiteKing)
 	coordsInRangeBlackKing := findCoordsInRangeKing(state.blackKing)
-	legalWhiteKingCoords := coordsDifference(coordsInRangeWhiteKing, coordsInRangeBlackKing)
-	legalWhiteKingCoords = coordsDifference(legalWhiteKingCoords, []Coord{state.whiteRook})
-
-	legalWhiteKingMoves := make([]Move, 0)
-
-	for _, coord := range legalWhiteKingCoords {
-		legalWhiteKingMoves = append(legalWhiteKingMoves, Move{from: state.whiteKing, to: coord, piece: whiteKing})
+	coords := coordsDifference(coordsInRangeWhiteKing, coordsInRangeBlackKing)
+	coords = coordsDifference(coords, []Coord{state.whiteRook})
+	res := make([]Move, 0)
+	for _, coord := range coords {
+		res = append(res, Move{from: state.whiteKing, to: coord, piece: whiteKing})
 
 	}
-
-	return legalWhiteKingMoves
+	return res
 }
 
 func findAllLegalWhiteRookMoves(state State) []Move {
 	coordsInRangeWhiteRook := findCoordsInRangeRook(state, state.whiteRook)
-	legalWhiteRookCoords := coordsDifference(coordsInRangeWhiteRook, []Coord{state.whiteKing})
-	legalWhiteRookMoves := make([]Move, 0)
-
-	for _, coord := range legalWhiteRookCoords {
-		legalWhiteRookMoves = append(legalWhiteRookMoves, Move{from: state.whiteRook, to: coord, piece: whiteRook})
+	coords := coordsDifference(coordsInRangeWhiteRook, []Coord{state.whiteKing})
+	res := make([]Move, 0)
+	for _, coord := range coords {
+		res = append(res, Move{from: state.whiteRook, to: coord, piece: whiteRook})
 	}
-	return legalWhiteRookMoves
+	return res
 }
 
 func findLegalMoves(state State) []Move {
-
-	// debug("coords", fmt.Sprintf("blackKing: %v, whiteKing: %v, whiteRook: %v", coordsInRangeBlackKing, coordsInRangeWhiteKing, coordsInRangeWhiteRook))
-
-	legalMoves := make([]Move, 0)
-
+	res := make([]Move, 0)
 	if state.movingPlayer == "white" {
-		legalMoves = append(legalMoves, findAllLegalWhiteKingMoves(state)...)
-		legalMoves = append(legalMoves, findAllLegalWhiteRookMoves(state)...)
+		res = append(res, findAllLegalWhiteKingMoves(state)...)
+		res = append(res, findAllLegalWhiteRookMoves(state)...)
 	} else {
-		legalMoves = append(legalMoves, findAllLegalBlackKingMoves(state)...)
+		res = append(res, findAllLegalBlackKingMoves(state)...)
 	}
 
-	return legalMoves
+	return res
 }
 
 func applyMove(state State, move Move) State {
@@ -239,38 +226,18 @@ func applyMove(state State, move Move) State {
 	}
 }
 
-func debug(message string, values ...interface{}) {
-	// print to stderr
-	fmt.Fprintf(os.Stderr, "%s%v\n", message, values)
-}
-
 func isCheckmate(state State) bool {
 	return isChecked(state) && len(findLegalMoves(state)) == 0
 }
 
 func main() {
-	// movingPlayer: Either black or white
-	// whiteKing: Position of the white king, e.g. a2
-	// whiteRook: Position of the white rook
-	// blackKing: Position of the black king
 	var movingPlayer, whiteKing, whiteRook, blackKing string
 	fmt.Scan(&movingPlayer, &whiteKing, &whiteRook, &blackKing)
-
 	whiteKingCoord := parseCoord(whiteKing)
 	whiteRookCoord := parseCoord(whiteRook)
 	blackKingCoord := parseCoord(blackKing)
-
 	state := State{movingPlayer, whiteKingCoord, whiteRookCoord, blackKingCoord}
-
-	debug("state", state)
-
-	// debugState := State{"white", Coord{7, 7}, Coord{6, 6}, Coord{0, 0}}
-	// debugWinningMoves := findWinningMoves(debugState)
-	// debug("winning moves", formatMovesSequence(debugWinningMoves))
-
 	winningMoves := findWinningMoves(state)
-
-	// Write a sequence of moves (a single move is, e.g. a2b1) separated by spaces
 	fmt.Println(formatMovesSequence(winningMoves))
 }
 
@@ -282,42 +249,25 @@ func formatMovesSequence(moves []Move) string {
 	return res
 }
 
-type BreadthFirstSearchNode struct {
-	state   State
-	history []Move
-}
-
-// Breadth-first search until the first checkmate is found
 func findWinningMoves(state State) []Move {
-
 	visitedState := make(map[State]bool)
-
-	queue := make([]BreadthFirstSearchNode, 0)
-	queue = append(queue, BreadthFirstSearchNode{state, []Move{}})
-
+	queue := []BreadthFirstSearchNode{{state, []Move{}}}
+	var node BreadthFirstSearchNode
 	for len(queue) > 0 {
-		node := queue[0]
-		queue = queue[1:]
-
-		checkMated := isCheckmate(node.state)
-		if checkMated {
-			debug("Checkmate found", node.history)
+		node, queue = queue[0], queue[1:]
+		if isCheckmate(node.state) {
 			return node.history
 		}
-
-		legalMoves := findLegalMoves(node.state)
-
-		for iMove := 0; iMove < len(legalMoves); iMove++ {
-			newState := applyMove(node.state, legalMoves[iMove])
+		for _, move := range findLegalMoves(node.state) {
+			newState := applyMove(node.state, move)
 			if _, ok := visitedState[newState]; !ok {
 				visitedState[newState] = true
 				newHistory := make([]Move, len(node.history), len(node.history)+1)
 				copy(newHistory, node.history)
-				newHistory = append(newHistory, legalMoves[iMove])
+				newHistory = append(newHistory, move)
 				queue = append(queue, BreadthFirstSearchNode{newState, newHistory})
 			}
 		}
 	}
-
 	return nil
 }
