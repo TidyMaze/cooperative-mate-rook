@@ -249,6 +249,13 @@ func formatMovesSequence(moves []Move) string {
 	return res
 }
 
+func addHistoryCopy(history []Move, move Move) []Move {
+	res := make([]Move, len(history)+1)
+	copy(res, history)
+	res[len(history)] = move
+	return res
+}
+
 func findWinningMoves(state State) []Move {
 	visitedState := make(map[State]bool)
 	queue := []BreadthFirstSearchNode{{state, []Move{}}}
@@ -262,10 +269,7 @@ func findWinningMoves(state State) []Move {
 			newState := applyMove(node.state, move)
 			if _, ok := visitedState[newState]; !ok {
 				visitedState[newState] = true
-				newHistory := make([]Move, len(node.history), len(node.history)+1)
-				copy(newHistory, node.history)
-				newHistory = append(newHistory, move)
-				queue = append(queue, BreadthFirstSearchNode{newState, newHistory})
+				queue = append(queue, BreadthFirstSearchNode{newState, addHistoryCopy(node.history, move)})
 			}
 		}
 	}
