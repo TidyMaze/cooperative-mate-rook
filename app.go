@@ -212,7 +212,8 @@ func findChildrenNodes(node BreadthFirstSearchNode) []BreadthFirstSearchNode {
 	res := make([]BreadthFirstSearchNode, 0)
 	for _, move := range findLegalMoves(node.state) {
 		newState := applyMove(node.state, move)
-		res = append(res, BreadthFirstSearchNode{state: newState, history: addHistoryCopy(node.history, move)})
+		newNode := BreadthFirstSearchNode{state: newState, history: addHistoryCopy(node.history, move)}
+		res = append(res, newNode)
 	}
 	return res
 }
