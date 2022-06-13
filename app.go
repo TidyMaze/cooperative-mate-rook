@@ -39,7 +39,7 @@ type BreadthFirstSearchNode struct {
 	history []Move
 }
 
-var kingOffsets = [][]int{
+var kingOffsets = [][2]int{
 	{-1, -1},
 	{-1, 0},
 	{-1, 1},
@@ -50,7 +50,7 @@ var kingOffsets = [][]int{
 	{1, 1},
 }
 
-var rookOffsets = [][]int{
+var rookOffsets = [][2]int{
 	{-1, 0},
 	{0, -1},
 	{1, 0},
