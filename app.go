@@ -119,7 +119,7 @@ func isChecked(state State) bool {
 		to := state.whiteRook
 		for {
 			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
-			if to.x < 0 || to.x > 7 || to.y < 0 || to.y > 7 {
+			if !isValidCoord(to) {
 				break
 			}
 
