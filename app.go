@@ -208,6 +208,15 @@ func findLegalMoves(state State) []Move {
 	return res
 }
 
+func findChildrenNodes(node BreadthFirstSearchNode) []BreadthFirstSearchNode {
+	res := make([]BreadthFirstSearchNode, 0)
+	for _, move := range findLegalMoves(node.state) {
+		newState := applyMove(node.state, move)
+		res = append(res, BreadthFirstSearchNode{state: newState, history: addHistoryCopy(node.history, move)})
+	}
+	return res
+}
+
 func applyMove(state State, move Move) State {
 	if move.piece == whiteKing {
 		return State{
@@ -287,11 +296,10 @@ func findWinningMoves(state State) []Move {
 		if isCheckmate(node.state) {
 			return node.history
 		}
-		for _, move := range findLegalMoves(node.state) {
-			newState := applyMove(node.state, move)
-			if !isAlreadyVisited(newState, visitedState) {
-				setVisited(newState, &visitedState)
-				queue = append(queue, BreadthFirstSearchNode{newState, addHistoryCopy(node.history, move)})
+		for _, childNode := range findChildrenNodes(node) {
+			if !isAlreadyVisited(childNode.state, visitedState) {
+				setVisited(childNode.state, &visitedState)
+				queue = append(queue, childNode)
 			}
 		}
 	}
