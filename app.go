@@ -265,6 +265,15 @@ func addHistoryCopy(history []Move, move Move) []Move {
 	return res
 }
 
+func isAlreadyVisited(state State, cache map[State]bool) bool {
+	_, ok := cache[state]
+	return ok
+}
+
+func setVisited(state State, cache *map[State]bool) {
+	(*cache)[state] = true
+}
+
 func findWinningMoves(state State) []Move {
 	visitedState := make(map[State]bool)
 	queue := []BreadthFirstSearchNode{{state, []Move{}}}
@@ -276,8 +285,8 @@ func findWinningMoves(state State) []Move {
 		}
 		for _, move := range findLegalMoves(node.state) {
 			newState := applyMove(node.state, move)
-			if _, ok := visitedState[newState]; !ok {
-				visitedState[newState] = true
+			if !isAlreadyVisited(newState, visitedState) {
+				setVisited(newState, &visitedState)
 				queue = append(queue, BreadthFirstSearchNode{newState, addHistoryCopy(node.history, move)})
 			}
 		}
