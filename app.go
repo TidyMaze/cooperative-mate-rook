@@ -20,6 +20,33 @@ type State struct {
 	blackKing    Coord
 }
 
+func (s State) moveWhiteKing(move Move) State {
+	return State{
+		movingPlayer: "black",
+		whiteKing:    move.to,
+		whiteRook:    s.whiteRook,
+		blackKing:    s.blackKing,
+	}
+}
+
+func (s State) moveWhiteRook(move Move) State {
+	return State{
+		movingPlayer: "black",
+		whiteKing:    s.whiteKing,
+		whiteRook:    move.to,
+		blackKing:    s.blackKing,
+	}
+}
+
+func (s State) moveBlackKing(move Move) State {
+	return State{
+		movingPlayer: "white",
+		whiteKing:    s.whiteKing,
+		whiteRook:    s.whiteRook,
+		blackKing:    move.to,
+	}
+}
+
 type Piece int8
 
 const (
@@ -220,26 +247,11 @@ func findChildrenNodes(node BreadthFirstSearchNode) []BreadthFirstSearchNode {
 
 func applyMove(state State, move Move) State {
 	if move.piece == whiteKing {
-		return State{
-			movingPlayer: "black",
-			whiteKing:    move.to,
-			whiteRook:    state.whiteRook,
-			blackKing:    state.blackKing,
-		}
+		return state.moveWhiteKing(move)
 	} else if move.piece == blackKing {
-		return State{
-			movingPlayer: "white",
-			whiteKing:    state.whiteKing,
-			whiteRook:    state.whiteRook,
-			blackKing:    move.to,
-		}
+		return state.moveBlackKing(move)
 	} else if move.piece == whiteRook {
-		return State{
-			movingPlayer: "black",
-			whiteKing:    state.whiteKing,
-			whiteRook:    move.to,
-			blackKing:    state.blackKing,
-		}
+		return state.moveWhiteRook(move)
 	} else {
 		panic("unknown piece")
 	}
