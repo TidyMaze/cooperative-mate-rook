@@ -61,6 +61,10 @@ func (c Coord) String() string {
 	return fmt.Sprintf("%c%c", c.x+'a', (8-c.y-1)+'1')
 }
 
+func (c Coord) addOffset(offset [2]int) Coord {
+	return Coord{c.x + offset[0], c.y + offset[1]}
+}
+
 func (s State) String() string {
 	return fmt.Sprintf("%s %s %s %s", s.movingPlayer, s.whiteKing, s.whiteRook, s.blackKing)
 }
@@ -80,7 +84,7 @@ func parseCoord(s string) Coord {
 func findCoordsInRangeKing(from Coord) []Coord {
 	res := make([]Coord, 0)
 	for _, offset := range kingOffsets {
-		to := Coord{x: from.x + offset[0], y: from.y + offset[1]}
+		to := from.addOffset(offset)
 		if !isValidCoord(to) {
 			continue
 		}
@@ -99,7 +103,7 @@ func findCoordsInRangeRook(state State, from Coord) []Coord {
 	for _, offset := range rookOffsets {
 		to := from
 		for {
-			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
+			to = to.addOffset(offset)
 			if !isValidCoord(to) {
 				break
 			}
@@ -118,7 +122,7 @@ func isChecked(state State) bool {
 	for _, offset := range rookOffsets {
 		to := state.whiteRook
 		for {
-			to = Coord{x: to.x + offset[0], y: to.y + offset[1]}
+			to = to.addOffset(offset)
 			if !isValidCoord(to) {
 				break
 			}
